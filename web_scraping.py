@@ -95,6 +95,7 @@ def process_articles(file_name):
             html_text = response.text
         except Exception as e:
             print(f"Error fetching URL {url}: {e}")
+            article["extracted_content"] = "Error fetching article. Extraction skipped."
             continue
         
         if is_paywalled(html_text, url):
