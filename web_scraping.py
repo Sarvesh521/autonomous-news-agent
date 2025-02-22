@@ -1,159 +1,199 @@
-import json
 import requests
 from bs4 import BeautifulSoup
-from urllib.parse import urlparse
-import get_urls as get_urls
+from urllib.parse import urljoin
+import re
 import time
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
+import random
+import json
 
-def is_paywalled(html_text, url=None):
-    paywall_keywords = ["pay wall", "paywall", "pay-wall"]
-    lower_text = html_text.lower()
-    for keyword in paywall_keywords:
-        if keyword in lower_text:
-            print("Paywall keyword found:", keyword)
-            return True
+##########################
+# Utility: Random User-Agent
+##########################
+def get_random_headers():
+    user_agents = [
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/109.0",
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.1 Safari/605.1.15",
+        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36",
+        "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36",
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 11_2_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36",
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Edge/90.0.818.42",
+        "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:89.0) Gecko/20100101 Firefox/89.0",
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1",
+        "Mozilla/5.0 (iPad; CPU OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1"
+    ]
+    return {"User-Agent": random.choice(user_agents)}
+
+##########################
+# Extraction functions
+##########################
+def get_url_links_from_topic(topic):
+    headers = get_random_headers()
+    url = f"https://flipboard.com/search/{topic}"
+    print("Fetching URL:", url)
     try:
-        soup = BeautifulSoup(html_text, 'html.parser')
-        scripts = soup.find_all("script", type="application/ld+json")
-        for script in scripts:
-            try:
-                json_data = json.loads(script.string)
-                def check_json(data):
-                    if isinstance(data, dict):
-                        if 'isAccessibleForFree' in data:
-                            accessible = str(data['isAccessibleForFree']).lower()
-                            if accessible in ['false', 'no']:
-                                return True
-                        if 'hasPart' in data:
-                            part = data['hasPart']
-                            if isinstance(part, dict) and 'isAccessibleForFree' in part:
-                                accessible = str(part['isAccessibleForFree']).lower()
-                                if accessible in ['false', 'no']:
-                                    return True
-                            elif isinstance(part, list):
-                                for item in part:
-                                    if isinstance(item, dict) and 'isAccessibleForFree' in item:
-                                        accessible = str(item['isAccessibleForFree']).lower()
-                                        if accessible in ['false', 'no']:
-                                            return True
-                    return False
-
-                if isinstance(json_data, dict) and check_json(json_data):
-                    return True
-                elif isinstance(json_data, list):
-                    for item in json_data:
-                        if check_json(item):
-                            return True
-            except Exception:
-                continue
-    except Exception:
-        pass
-
-    if url:
-        try:
-            headers = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"}
-            parsed_url = urlparse(url)
-            if not parsed_url.scheme:
-                url = "https://" + url
-            response = requests.get(url, headers=headers, timeout=10)
-            googlebot_html = response.text.lower()
-            for keyword in paywall_keywords:
-                if keyword in googlebot_html:
-                    return True
-        except Exception:
-            pass
-
-    return False
-
-# def extract_text_from_html(html):
-#     soup = BeautifulSoup(html, "html.parser")
-#     for tag in soup(["script", "style", "noscript"]):
-#         tag.decompose()
-#     text = soup.get_text(separator=" ")
-#     return ' '.join(text.split())
-
-
-def extract_title_and_text_with_selenium(url):
-    """
-    Uses Selenium (with a headless browser) to extract the full article text and title.
-    """
-    chrome_options = Options()
-    chrome_options.add_argument("--headless")
-    chrome_options.add_argument("--disable-gpu")
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-extensions")
-    chrome_options.add_argument("--disable-infobars")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--blink-settings=imagesEnabled=false")  # Disables images
-
-    # Disable images, stylesheets, and plugins via preferences.
-    prefs = {
-        "profile.managed_default_content_settings.images": 2,
-        "profile.managed_default_content_settings.stylesheets": 2,
-        "profile.managed_default_content_settings.plugins": 2
-    }
-    chrome_options.add_experimental_option("prefs", prefs)
-    
-    driver = webdriver.Chrome(options=chrome_options)
-    try:
-        driver.get(url)
-        # Wait a bit for dynamic content to load.
-        time.sleep(3)
-        html = driver.page_source
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()
     except Exception as e:
-        print(f"Selenium error: {e}")
-        html = ""
-    finally:
-        driver.quit()
+        print("Error fetching URL:", e)
+        exit()
+
+    soup = BeautifulSoup(response.text, "html.parser")
+    links = []
+    for a in soup.find_all("a", href=True):
+        href = a["href"]
+        if href not in links:
+            links.append(href)
+    # print("\nFound URLs on search page:")
+    base_url = "https://flipboard.com/"
+    topic_names = []
+    url_links = []
+    for link in links:
+        if '/topic' in link:
+            url_links.append(urljoin(base_url, link))
+            # Slice off the initial characters to create a topic name (adjust as needed)
+            topic_names.append(link[7:])
+    # print("Topic Names:", topic_names)
+    # print("Topic URLs:", url_links)
+
+    # Create a dictionary that maps topic URL to topic name.
+    link_topic_name = dict(zip(url_links, topic_names))
+    print("Mapping:", link_topic_name)
+    return (url_links, link_topic_name)
+
+def get_article_urls_from_topic_url(topic_url):
+    headers = get_random_headers()
+    print("Fetching topic URL:", topic_url)
+    try:
+        response = requests.get(topic_url, headers=headers, timeout=10)
+        response.raise_for_status()
+    except Exception as e:
+        print("Error fetching topic URL:", e)
+        exit()
+
+    soup = BeautifulSoup(response.text, "html.parser")
+    links = []
+    list_a_tags = soup.find_all("a", href=True)
+    for a in list_a_tags:
+        href = a["href"]
+        if href not in links:
+            if '/topic/' in href and topic_url.split('/')[-1].lower() in href.lower() and len(href) > 30:
+                links.append(href)
+    # print("\nFound Article URLs (raw):", links)
+    base_url = "https://flipboard.com/"
+    article_urls = []
+    for link in links:
+        full_link = urljoin(base_url, link)
+        # print(full_link)
+        article_urls.append(full_link)
     
-    soup = BeautifulSoup(html, "html.parser")
-    
-    # Extract title from the <title> tag.
-    title_tag = soup.find("title")
-    title_text = title_tag.get_text().strip() if title_tag else ""
-    
-    for tag in soup(["script", "style", "noscript", "header", "footer", "nav", "iframe"]):
+    return article_urls
+
+def get_source_url(url):
+    headers = get_random_headers()
+    print("Fetching source from URL:", url)
+    try:
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()
+    except Exception as e:
+        print("Error fetching URL:", e)
+        return None
+
+    soup = BeautifulSoup(response.text, "html.parser")
+    script_tags = soup.find_all("script")
+    for script_tag in script_tags:
+        if 'sourceURL' in str(script_tag):
+            match = re.search(r'"sourceURL":"(.*?)"', str(script_tag))
+            if match:
+                source_url = match.group(1)
+                return source_url
+    return None
+
+def extract_article_text(url):
+    headers = get_random_headers()
+    print("Extracting article text from:", url)
+    try:
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()
+    except Exception as e:
+        print("Error fetching article text from URL:", e)
+        return ""
+        
+    soup = BeautifulSoup(response.text, "html.parser")
+    for tag in soup(["script", "style", "header", "footer", "nav", "aside", "noscript"]):
         tag.decompose()
     
-    text = soup.get_text(separator=" ")
-    clean_text = " ".join(text.split())
+    article = soup.find("article")
+    if article:
+        text = article.get_text(separator="\n")
+    else:
+        text = soup.get_text(separator="\n")
     
-    return title_text, clean_text, html
+    lines = [line.strip() for line in text.splitlines()]
+    clean_text = "\n".join(line for line in lines if line)
+    return clean_text
 
-def process_articles():
-    count=0
-    paywall_urls = []
-    articles=[]
+##########################
+# Main workflow
+##########################
+def main():
+    # Define the topic(s) you want to process.
+    topics = ["Tennis"]  # Extend this list as needed.
+    result = []
     
-    for url in get_urls.urls: 
-        count+=1
-        print(count)
-        article={}
-        article["url"]=url
-        title, text, html_text = extract_title_and_text_with_selenium(url)
-        article["title"]=title
-        article["extracted_content"]=text
+    for topic in topics:
+        # print(f"\nProcessing topic: {topic}")
+        topic_url_links, topic_name_dict = get_url_links_from_topic(topic)
+        print("Topic URL Links:", topic_url_links)
+        print("Topic Name Dictionary:", topic_name_dict)
+        # Process each topic URL
+        count=0
+        for topic_url in topic_url_links:
+            count+=1
+            print("topic_url",topic_url)
+            topic_articles = []
+            article_topic_name = topic_name_dict.get(topic_url, topic)
+            print("article_topic_name",article_topic_name)
+            # delay = random.uniform(5,8)
+            # print(f"Waiting for {delay:.2f} seconds before fetching topic page.")
+            # time.sleep(delay)
+            
+            article_urls = get_article_urls_from_topic_url(topic_url)
+            print("Article URLs:", article_urls)
+            # Process each article URL
+            for article_url in article_urls:
+                # delay = random.uniform(5, 10)
+                # print(f"Waiting for {delay:.2f} seconds before processing article URL.")
+                # time.sleep(delay)
+                
+                source_url = get_source_url(article_url)
+                if not source_url:
+                    print("Source URL not found for article:", article_url)
+                    continue
+                
+                # delay = random.uniform(3, 5)
+                # print(f"Waiting for {delay:.2f} seconds before fetching article text.")
+                # time.sleep(delay)
+                
+                article_text = extract_article_text(source_url)
+                topic_articles.append((source_url, article_text))
         
-        if is_paywalled(html_text, url):
-            paywall_urls.append(url)
-            article["extracted_content"] = "Paywalled article. Extraction skipped."
-        
-        if "About this page Our systems have detected unusual traffic from your computer network." in text:
-            article["extracted_content"] = "Detected as a bot. Extraction skipped."
-        articles.append(article)
+                # Use the topic name from the mapping (if available) from the first topic URL.
+                # topic_name_extracted = topic_name_dict.get(topic_url_links[0], topic) if topic_url_links else topic
+            result.append({
+                "topic_name": article_topic_name,
+                "url_content": topic_articles
+            })
     
-    print("\nPaywall URLs:")
-    for url in paywall_urls:
-        print(url)
-
-    print("Len of Paywall URLs: ", len(paywall_urls))
-    print("Total Articles: ", count)
-    if count > 0:
-        print("Paywall Percentage: ", (len(paywall_urls)/count)*100)
+    # Write the final result to processed_articles.json
+    with open("processed_articles.json", "w", encoding="utf-8") as f:
+        json.dump(result, f, indent=4, ensure_ascii=False)
     
-    with open("articles.json", "w") as f:
-        json.dump(articles, f, indent=4)
+    # print("\nFinal Result:")
+    # print(json.dumps(result, indent=4))
 
-process_articles()
+if __name__ == "__main__":
+    start_time = time.time()    
+    main()
+    end_time = time.time()
+    print(f"\nTotal time taken: {end_time - start_time:.2f} seconds.")
