@@ -10,7 +10,7 @@ from langchain.embeddings import HuggingFaceEmbeddings
 import numpy as np
 
 # Configuration
-NO_OF_ARTICLES = 3   # Number of articles to process.
+# NO_OF_ARTICLES = 3   # Number of articles to process.
 NO_OF_CHUNKS = 3     # Number of chunks to select for summarization.
 SCRAPER_OUTPUT_FILE = "processed_articles.json"
 MODEL_OUTPUT_FILE = "summarized_articles.json"
@@ -103,9 +103,8 @@ def get_chat_response(system_prompt: str, user_prompt: str, model: str = "deepse
     full_response = re.sub(r"<think>.*?</think>", "", full_response, flags=re.DOTALL).strip()
     return full_response
 
-def main(NO_OF_ARTICLES, NO_OF_CHUNKS):
+def main(NO_OF_CHUNKS):
     articles = load_processed_articles(SCRAPER_OUTPUT_FILE)
-    articles = articles[:NO_OF_ARTICLES]
     final_results = []
 
     # System prompt remains unchanged.
@@ -163,6 +162,6 @@ def main(NO_OF_ARTICLES, NO_OF_CHUNKS):
 
 if __name__ == "__main__":
     start_time = time.time()
-    main(NO_OF_ARTICLES, NO_OF_CHUNKS)
+    main(NO_OF_CHUNKS)
     end_time = time.time()
     print(f"\nTotal time taken: {end_time - start_time:.2f} seconds.")

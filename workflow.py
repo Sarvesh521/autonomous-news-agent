@@ -3,14 +3,14 @@ import web_scraping as scraper
 import database as db
 import time
 
-TOPIC_NAME = "Tennis"
+TOPIC_NAME = "Crime"
 
 def run_web_scraping(topic):
-    scraper.main(topic)
+    scraper.main(topic,scraper.MAX_ARTICLES_PER_SUBTOPIC,scraper.MAX_NO_OF_SUBTOPICS)
     print("Web scraping completed successfully.")
 
 def run_model():
-    model.main(model.NO_OF_ARTICLES,model.NO_OF_CHUNKS)
+    model.main(model.NO_OF_CHUNKS)
     print("Model processing completed successfully.")
 
 def run_database(topic):

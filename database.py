@@ -15,6 +15,21 @@ PORT = "5432"
 
 DB_LOAD_FILE = "summarized_articles.json"
 
+
+def check_topic_exists(topic):
+    # Check if the topic exists in the database
+    conn, cur = connect_to_db(DB_NAME)
+    try:
+        cur.execute("SELECT 1 FROM topic_summaries WHERE main_topic = %s;", (topic,))
+        exists = cur.fetchone()
+        return bool(exists)
+    except Exception as e:
+        print("Error checking topic:", e)
+        return False
+    
+    cur.close()
+    conn.close()
+
 def connect_default():
     """Connect to the default 'postgres' database."""
     try:

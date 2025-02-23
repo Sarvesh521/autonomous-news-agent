@@ -6,9 +6,12 @@ import re
 import time
 from urllib.parse import urljoin
 from bs4 import BeautifulSoup
-
+import argparse
+from urllib.parse import quote
 
 SCRAPER_OUTPUT_FILE = "processed_articles.json"
+MAX_ARTICLES_PER_SUBTOPIC = 4
+MAX_NO_OF_SUBTOPICS = 5
 
 def get_random_headers():
     user_agents = [
@@ -27,6 +30,7 @@ def get_random_headers():
 
 def get_url_links_from_topic(topic):
     headers = get_random_headers()
+    topic = quote(topic)
     url = f"https://flipboard.com/search/{topic}"
     print("Fetching URL:", url)
     try:
@@ -34,7 +38,6 @@ def get_url_links_from_topic(topic):
         response.raise_for_status()
     except Exception as e:
         print("Error fetching URL:", e)
-        # Return empty results so the program can continue.
         return ([], {})
 
     soup = BeautifulSoup(response.text, "html.parser")
@@ -49,7 +52,7 @@ def get_url_links_from_topic(topic):
     for link in links:
         if '/topic' in link:
             url_links.append(urljoin(base_url, link))
-            # Slice off the initial characters to create a topic name (adjust as needed)
+            # Create a topic name by slicing off the first few characters; adjust as needed.
             topic_names.append(link[7:])
     link_topic_name = dict(zip(url_links, topic_names))
     print("Mapping:", link_topic_name)
@@ -63,7 +66,7 @@ def get_article_urls_from_topic_url(topic_url):
         response.raise_for_status()
     except Exception as e:
         print("Error fetching topic URL:", e)
-        return []  # Return empty list so the program can continue.
+        return []
 
     soup = BeautifulSoup(response.text, "html.parser")
     links = []
@@ -121,9 +124,7 @@ def extract_article_text(url):
     clean_text = "\n".join(line for line in lines if line)
     return clean_text
 
-def main(topic):
-    # topics = [topic]
-    
+def main(topic, max_articles, max_subtopics):
     result = []
     topic_url_links, topic_name_dict = get_url_links_from_topic(topic)
     if not topic_url_links:
@@ -132,34 +133,48 @@ def main(topic):
 
     print("Topic URL Links:", topic_url_links)
     print("Topic Name Dictionary:", topic_name_dict)
+    
+    subtopic_count = 0
     for topic_url in topic_url_links:
+        if subtopic_count >= max_subtopics:
+            print(f"Reached maximum subtopics limit: {max_subtopics}")
+            break
         topic_articles = []
         article_topic_name = topic_name_dict.get(topic_url, topic)
         print("Processing topic URL:", topic_url)
         print("Article topic name:", article_topic_name)
         article_urls = get_article_urls_from_topic_url(topic_url)
         print("Article URLs:", article_urls)
+        article_count = 0
         for article_url in article_urls:
+            if article_count >= max_articles:
+                print(f"Reached maximum articles per subtopic limit: {max_articles}")
+                break
             source_url = get_source_url(article_url)
             if not source_url:
                 print("Source URL not found for article:", article_url)
                 continue
             article_text = extract_article_text(source_url)
             topic_articles.append((source_url, article_text))
-        result.append({
-            "topic_name": article_topic_name,
-            "url_content": topic_articles
-        })
-    
+            article_count += 1
+        if topic_articles:
+            result.append({
+                "topic_name": article_topic_name,
+                "url_content": topic_articles
+            })
+            subtopic_count += 1
+
     try:
-        with open(SCRAPER_OUTPUT_FILE , "w", encoding="utf-8") as f:
+        with open(SCRAPER_OUTPUT_FILE, "w", encoding="utf-8") as f:
             json.dump(result, f, indent=4, ensure_ascii=False)
-        print("Web scraping completed successfully. Data written to processed_articles.json")
+        print("Web scraping completed successfully. Data written to", SCRAPER_OUTPUT_FILE)
     except Exception as e:
         print("Error writing JSON file:", e)
 
+
 if __name__ == "__main__":
+    topic = "Manchester United"
     start_time = time.time()
-    main()
+    main(topic, MAX_ARTICLES_PER_SUBTOPIC, MAX_NO_OF_SUBTOPICS)
     end_time = time.time()
     print(f"\nTotal time taken: {end_time - start_time:.2f} seconds.")
