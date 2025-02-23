@@ -172,3 +172,5 @@ cython_debug/
 
 # Secret credentials
 .env
+.ollama
+Learn
