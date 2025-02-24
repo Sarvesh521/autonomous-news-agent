@@ -100,7 +100,7 @@ def extract_title(summary_text: str):
     else:
         return "No Title Found", summary_text
 
-def get_chat_response(system_prompt: str, user_prompt: str, model: str = "deepseek-r1:8b") -> str:
+def get_chat_response(system_prompt: str, user_prompt: str, model: str = "deepseek-r1:1.5b") -> str:
     """
     Get a chat response from the specified model using both a system and a user prompt.
     
@@ -135,9 +135,13 @@ def main(NO_OF_CHUNKS):
     articles = load_processed_articles(SCRAPER_OUTPUT_FILE)
     final_results = []
     system_prompt = (
-        "You are a highly factual and SEO-optimized summarizer. "
-        "Your task is to produce concise, authoritative, and fully factual summaries. "
-        "Avoid hallucinations and ensure the output includes relevant SEO keywords."
+        "You are an expert summarizer with advanced journalistic skills and SEO expertise. "
+        "Your responses must be completely factual, concise, and authoritative. "
+        "Do not hallucinate details. Always include precise geographic information, "
+        "pinpointing the location to the district level if available. Otherwise hierarchies above district "
+        "When including location information in your output, you must provide only the loction name alone , no need for any add ons . "
+        "For example, if the input location is 'Belagavi district, Karnataka', your output should be simply 'Belagavi'. "
+        "Maintain a clear, formal tone and ensure your summary is optimized with relevant SEO keywords."
     )
     print("articles")
     print(articles)
@@ -146,31 +150,29 @@ def main(NO_OF_CHUNKS):
         print("x", x)
         print("x['url_content']", x['url_content'])
         user_prompt = (
-            "Please produce a blog post summary for the following text. "
-            "Your output MUST start with the blog post title exactly in the following format: \n\n"
+            "Based on the text provided below, please generate a blog post summary. "
+            "Your output must follow this strict format exactly:\n\n"
             "**Title:** <actual title of the blog post>\n\n"
-            "Provide a Geaopgraphic Location from where the article is based. Pinpoint the location, give me as low level information of the location as possible. \n\n"
-            "Location: <Location> \n\n"
-            "Then provide a concise, factual summary below. "
-            "Ensure that the summary is SEO optimized with keywords. \n\n"
+            "**Location:** <geographic location – district level if possible, otherwise state>\n\n"
+            "Then provide a concise, factual summary of the article. "
+            "Ensure that the summary is written in clear, authoritative language and includes relevant SEO keywords.\n\n"
             "Text: {text}"
         )
+
         user_prompt = user_prompt.format(text=x['url_content'])
         # print("user_prompt", user_prompt)
         full_response = get_chat_response(system_prompt, user_prompt)
         print("full_response")
         print(full_response)
         print("....................")
-        # title, clean_summary = extract_title(full_response)
         title, location, clean_summary = extract_info(full_response)
-        # print("title", title)
-        # print("clean_summary", clean_summary)
         final_results.append({
             "topic_name": title,
             "title": title,
             "location": location,
             "summary": clean_summary
         })
+        # break
     with open(MODEL_OUTPUT_FILE, "w", encoding="utf-8") as f:
         json.dump(final_results, f, indent=4, ensure_ascii=False)
     print("Summarized articles saved to:", MODEL_OUTPUT_FILE)

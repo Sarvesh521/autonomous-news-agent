@@ -126,4 +126,3 @@ def dump_posts_to_json():
     except Exception as e:
         print(f"❌ Error fetching posts: {str(e)}")
 
-

@@ -93,7 +93,7 @@ def main():
             articles_topic[article["location"]].append(article)
 
         topics = list(articles_topic.keys())
-
+        print("Topics", topics)
         tabs = st.tabs(topics + ["Posted Articles"])
 
         i = 1
