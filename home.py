@@ -4,7 +4,6 @@ import json
 from auth_blogger import getBloggerService, dump_posts_to_json
 import web_scraping
 import Model as model
-from auth_blogger import authorize_credentials
 # import database as db
 
 
@@ -57,7 +56,6 @@ def reset():
 
 # Main Streamlit app
 def main():
-    authorize_credentials()
     if "flag" not in st.session_state:
         st.session_state.flag = 0
     
