@@ -38,22 +38,31 @@ All published files can be viewed at https://flipr2025.blogspot.com/ .
 
 The admin site can be viewed at http://54.145.35.27:8501 .
 
+NOTE: In case of refresh token error, please run the authorize_credentials.py from the auth_blogger.py module since google API tokens expire after a certain time.
+
 ## Tech Stack
 - **BeautifulSoup**: Web scraping to extract news from various sources
 - **Streamlit**: Admin dashboard for managing blog generation
 - **Blogger API**: Content management and automated publishing
 - **AWS**: Hosting and deployment of the admin platform
 - **DeepSeek-R1**: The open source LLM model is hosted on the AWS infrastructure.
-- **PostgreSQL**: Database management system for storing data
+- **PostgreSQL**: Database management system for storing data. This acts as a cache for the topics we have already been scraped and summarized.
 
 ## Blog Site
 The blog site containts multiple blogs published via the admin site. Each blog contains labels indicating which geographical subregion they belong to.
+
+![Blog Site](./images/Screenshot%202025-02-24%20230135.png)
+![Blog Site1](./images/Screenshot%202025-02-24%20230203.png)
 
 ## Admin Site
 The admin site has 2 main features.
 1. **Creating and Posting Blogs**: You can enter a topic in the given field. Web scraping is done followed by LLM inference to create new blogs. These can be viewed category-wise and posted to the blog on the click of a button.
 
-2. **Overview of Existing Blogs** : 
+![Admin Site](./images/Screenshot%202025-02-24%20230808.png)
+
+2. **Overview of Existing Blogs** : The live-posts page shows all the blogs that have been posted till now. You have the option of deleting any blog from here and it also has a link to the blog post.
+
+![Admin Site1](./images/Screenshot%202025-02-24%20231128.png)
 
 
 
