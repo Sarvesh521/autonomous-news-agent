@@ -12,6 +12,12 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Debug GitHub Secrets
+        run: |
+            echo "EC2_HOST: ${{ secrets.EC2_HOST }}"
+            echo "EC2_USER: ${{ secrets.EC2_USER }}"
+            echo "EC2_SSH_KEY: ${{secrets.EC2_SSH_KEY}}"
+
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.0
         with:
