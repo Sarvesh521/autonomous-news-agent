@@ -1,31 +1,31 @@
 import streamlit as st
 import time
 import json
-from auth_blogger import getBloggerService
+#from auth_blogger import getBloggerService
 import web_scraping
 import Model as model
 
-# Blogger posting function
-def postToBlogger(payload):
-    service = getBloggerService()
-    post = service.posts()
-    insert = post.insert(blogId='711424663010730438', body=payload).execute()
-    return insert
+# # Blogger posting function
+# def postToBlogger(payload):
+#     service = getBloggerService()
+#     post = service.posts()
+#     insert = post.insert(blogId='711424663010730438', body=payload).execute()
+#     return insert
 
-# Function to post a single article
-def postSingleEntry(entry):
-    title = entry["title"].strip()
-    content = entry["summary"].strip()
+# # Function to post a single article
+# def postSingleEntry(entry):
+#     title = entry["title"].strip()
+#     content = entry["summary"].strip()
 
-    payload = {
-        "kind": "blogger#post",
-        "title": title,
-        "content": content,
-        "contentFormat": "html",
-        "labels": [entry["topic_name"]]
-    }
+#     payload = {
+#         "kind": "blogger#post",
+#         "title": title,
+#         "content": content,
+#         "contentFormat": "html",
+#         "labels": [entry["topic_name"]]
+#     }
     
-    return postToBlogger(payload)
+#     return postToBlogger(payload)
 
 # Simulated scraping function
 def get_scraped_data(topic):
@@ -37,7 +37,8 @@ def get_articles(scraped_json):
 
 # Function to post an article
 def post_article(article, i):
-    response = postSingleEntry(article)  # Call Blogger API to post article
+    #response = postSingleEntry(article)  # Call Blogger API to post article
+    response  =True
     if response:
         st.success(f"✅ Posted: {article['title']} (URL: {response['url']})")
         st.session_state.disabled[i - 1] = True
