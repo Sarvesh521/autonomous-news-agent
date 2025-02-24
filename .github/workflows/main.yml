@@ -27,5 +27,5 @@ jobs:
             source myenv/bin/activate
             pip3 install psycopg2-binary
             pip3 install -r requirements.txt
-            nohup streamlit run frontend_real.py --server.port 8501 > streamlit.log 2>&1 &
+            nohup streamlit run home.py --server.port 8501 > streamlit.log 2>&1 &
             disown
