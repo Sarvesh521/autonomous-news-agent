@@ -24,8 +24,8 @@ jobs:
             git config user.email "SarveshKumar.A@iiitb.ac.in"
             git config github.token ${{ secrets.ACCESS_TOKEN }}
             git pull origin main
-            source myenv/bin/activate
-            pip3 install psycopg2-binary
-            pip3 install -r requirements.txt
+            # source myenv/bin/activate
+            # pip3 install psycopg2-binary
+            # pip3 install -r requirements.txt
             nohup streamlit run home.py --server.port 8501 > streamlit.log 2>&1 &
             disown
