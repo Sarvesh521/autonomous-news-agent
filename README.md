@@ -26,10 +26,17 @@ Each blog is categorized by geographic relevance, allowing users to explore news
 ## Installation and Running
 The program can be accessed either through the admin website url or by running it locally. Here is how to run the admin dashboard locally:
 
+Create a file `client_secrets.json` that contains your credentials for google blogspot.
+
+Then, make sure you are in the root folder and run:
+
 ```bash
-$ placeholder
+$ pip install -r requirements.txt
+$ streamlit run home.py
 ```
-All published files can be viewed at https://testflipr.blogspot.com/ .
+All published files can be viewed at https://flipr2025.blogspot.com/ . 
+
+The admin site can be viewed at http://54.145.35.27:8501 .
 
 ## Tech Stack
 - **BeautifulSoup**: Web scraping to extract news from various sources
@@ -38,6 +45,15 @@ All published files can be viewed at https://testflipr.blogspot.com/ .
 - **AWS**: Hosting and deployment of the admin platform
 - **DeepSeek-R1**: The open source LLM model is hosted on the AWS infrastructure.
 - **PostgreSQL**: Database management system for storing data
+
+## Blog Site
+The blog site containts multiple blogs published via the admin site. Each blog contains labels indicating which geographical subregion they belong to.
+
+## Admin Site
+The admin site has 2 main features.
+1. **Creating and Posting Blogs**: You can enter a topic in the given field. Web scraping is done followed by LLM inference to create new blogs. These can be viewed category-wise and posted to the blog on the click of a button.
+
+2. **Overview of Existing Blogs** : 
 
 
 
