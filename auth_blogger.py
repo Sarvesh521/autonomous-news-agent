@@ -41,47 +41,28 @@ def postFromJson():
         posts_data = json.load(file)
 
     for entry in posts_data:
-<<<<<<< Updated upstream
-        if not all(entry.get(field) for field in ["title", "summary", "location"]):
-            print("⚠️ Skipping entry due to missing fields.")
-=======
         # Check for missing or empty fields
         if not all(entry.get(field) and entry[field].strip() for field in ["title", "summary", "location"]):
             print(f"⚠️ Skipping entry due to missing fields: {entry}")
->>>>>>> Stashed changes
             continue
 
         title = entry["title"].strip()
         content = entry["summary"].strip()
-<<<<<<< Updated upstream
-        location = entry["location"].strip()
-=======
->>>>>>> Stashed changes
 
         payload = {
             "kind": "blogger#post",
             "title": title,
             "content": content,
             "contentFormat": "html",
-<<<<<<< Updated upstream
-            "labels": [location]  # Treat location as a single entity even if it contains commas
-=======
             "labels": [entry["location"]]
->>>>>>> Stashed changes
         }
         postToBlogger(payload)
 
 # 🔹 New Function: Post a single dictionary entry
 def postSingleEntry(entry):
-<<<<<<< Updated upstream
-    if not all(entry.get(field) for field in ["title", "summary", "location"]):
-        print("⚠️ Skipping entry due to missing fields.")
-        return
-=======
     if not all(entry.get(field) and entry[field].strip() for field in ["title", "summary", "location"]):
         print(f"⚠️ Skipping entry due to missing fields: {entry}")
         return None
->>>>>>> Stashed changes
 
     title = entry["title"].strip()
     content = entry["summary"].strip()
@@ -92,11 +73,7 @@ def postSingleEntry(entry):
         "title": title,
         "content": content,
         "contentFormat": "html",
-<<<<<<< Updated upstream
-        "labels": [location]  # Treat location as a single entity even if it contains commas
-=======
         "labels": [entry["location"]]
->>>>>>> Stashed changes
     }
     
     return postToBlogger(payload)
@@ -138,13 +115,6 @@ def dump_posts_to_json():
     except Exception as e:
         print(f"❌ Error fetching posts: {str(e)}")
 
-<<<<<<< Updated upstream
-postFromJson()
-<<<<<<< HEAD
 
 #postFromJson()
-=======
-=======
-#postFromJson()
->>>>>>> Stashed changes
->>>>>>> parent of f284324 (Debugging)
+
