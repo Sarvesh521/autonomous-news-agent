@@ -101,23 +101,6 @@ def main():
             st.write("Articles processed for", topic)
             st.divider()
 
-        if db.check_topic_exists(topic):
-            st.write(f"Topic {topic} already exists in the database.")
-            conn, cur = db.connect_to_db(db.DB_NAME)
-            st.write("Fetching topic summary from the database...")
-            st.session_state.articles = db.query_topic(cur, topic)
-            st.write ("Data fetched from the database for", topic)
-            cur.close()
-            conn.close()
-        else:
-            st.write("Scraping data...")
-            result = get_scraped_data(topic)
-            st.write("Data scraped for", topic)
-            st.write("Processing articles...")
-            st.session_state.articles = get_articles(result,topic)
-            st.write("Articles processed for", topic)
-            st.divider()
-
     print("HELLO")
     result = st.session_state.articles
     st.header("Articles")
