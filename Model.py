@@ -172,7 +172,7 @@ def main(NO_OF_CHUNKS):
             "location": location,
             "summary": clean_summary
         })
-        break
+        # break
     with open(MODEL_OUTPUT_FILE, "w", encoding="utf-8") as f:
         json.dump(final_results, f, indent=4, ensure_ascii=False)
     print("Summarized articles saved to:", MODEL_OUTPUT_FILE)
