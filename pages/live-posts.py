@@ -45,8 +45,6 @@ posts = load_posts()
 if posts:
     for post in posts:
         with st.expander(f"{post['title']}"):
-            st.write(f"📌 **Location:** {post.get('location', 'N/A')}")
-            st.write(f"📖 **Summary:** {post.get('summary', 'N/A')}")
             st.write(f"🔗 [View Post]({post['url']})")
             st.write(f"📅 **Published:** {post['published']}")
             if st.button(f"❌ Delete Post {post['id']}", key=post['id']):
