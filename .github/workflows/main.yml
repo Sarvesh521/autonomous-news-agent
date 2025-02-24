@@ -12,19 +12,12 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Debug GitHub Secrets
-        run: |
-            echo "EC2_HOST Length: $(echo -n "${{ secrets.EC2_HOST }}" | wc -c)"
-            echo "EC2_USER Length: $(echo -n "${{ secrets.EC2_USER }}" | wc -c)"
-            echo "EC2_SSH_KEY Length: $(echo -n "${{ secrets.EC2_SSH_KEY }}" | wc -c)"
-
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          key_path: ~/.ssh/id_rsa
           script: |
             cd autonomous-news-agent
             git pull origin main
