@@ -14,9 +14,9 @@ jobs:
 
       - name: Debug GitHub Secrets
         run: |
-            echo "EC2_HOST Length: ${#${{ secrets.EC2_HOST }}}"
-            echo "EC2_USER Length: ${#${{ secrets.EC2_USER }}}"
-            echo "EC2_SSH_KEY Length: $(echo "${{ secrets.EC2_SSH_KEY }}" | wc -c)"
+            echo "EC2_HOST Length: $(echo -n "${{ secrets.EC2_HOST }}" | wc -c)"
+            echo "EC2_USER Length: $(echo -n "${{ secrets.EC2_USER }}" | wc -c)"
+            echo "EC2_SSH_KEY Length: $(echo -n "${{ secrets.EC2_SSH_KEY }}" | wc -c)"
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.0
