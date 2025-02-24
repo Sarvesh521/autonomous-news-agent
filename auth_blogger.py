@@ -13,7 +13,7 @@ BLOG_ID = '8510639159580300368'  # Change this to your blog ID
 def authorize_credentials():
     CLIENT_SECRET = 'client_secrets.json'
     SCOPE = 'https://www.googleapis.com/auth/blogger'
-    STORAGE = Storage('credentials.storage')
+    STORAGE = Storage('creds.storage')
 
     credentials = STORAGE.get()
 

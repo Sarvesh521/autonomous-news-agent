@@ -175,4 +175,4 @@ cython_debug/
 .ollama
 Learn
 client_secrets.json
-credentials.storage
+creds.storage
