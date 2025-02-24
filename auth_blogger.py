@@ -38,17 +38,37 @@ def postFromJson():
         posts_data = json.load(file)
 
     for entry in posts_data:
-        title = entry["title"].strip()  # Extract title directly
-        content = entry["summary"].strip()  # Assuming this is now valid HTML
+        title = entry["title"].strip()  
+        content = entry["summary"].strip()  
 
         payload = {
             "kind": "blogger#post",
             "title": title,
-            "content": content,  # HTML is directly stored in `summary`
-            "contentFormat": "html",  # Ensure Blogger knows it's HTML
+            "content": content,
+            "contentFormat": "html",
             "labels": [entry["topic_name"]]
         }
         postToBlogger(payload)
 
-# Run the function to post from JSON
-postFromJson()
+# 🔹 New Function: Post a single dictionary entry
+def postSingleEntry(entry):
+    title = entry["title"].strip()
+    content = entry["summary"].strip()
+
+    payload = {
+        "kind": "blogger#post",
+        "title": title,
+        "content": content,
+        "contentFormat": "html",
+        "labels": [entry["topic_name"]]
+    }
+    
+    return postToBlogger(payload)
+
+# Example Usage:
+# sample_post = {
+#     "title": "Sample Blog Post",
+#     "summary": "<p>This is a sample post with HTML content.</p>",
+#     "topic_name": "Tech"
+# }
+# postSingleEntry(sample_post)
