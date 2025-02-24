@@ -20,6 +20,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd autonomous-news-agent
+            ls
             git pull origin main
             source myenv/bin/activate
             pip3 install streamlit
