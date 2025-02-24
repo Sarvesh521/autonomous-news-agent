@@ -1,9 +1,11 @@
 import json
 import streamlit as st
 from googleapiclient import discovery
-from auth_blogger import getBloggerService
+from auth_blogger import getBloggerService,dump_posts_to_json
 
-BLOG_ID = '711424663010730438'
+dump_posts_to_json()
+
+BLOG_ID = '8510639159580300368'
 
 # Function to load posts from JSON
 def load_posts():

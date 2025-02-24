@@ -1,25 +1,33 @@
 import json
 import httplib2
+import time
+import random
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.file import Storage
 from oauth2client.tools import run_flow
 from googleapiclient import discovery
 
-BLOG_ID = '711424663010730438'  # Change this to your blog ID
+BLOG_ID = '8510639159580300368'  # Change this to your blog ID
 
 # Start the OAuth flow to retrieve credentials
 def authorize_credentials():
     CLIENT_SECRET = 'client_secrets.json'
     SCOPE = 'https://www.googleapis.com/auth/blogger'
     STORAGE = Storage('credentials.storage')
-    
+
     credentials = STORAGE.get()
-    if credentials is None or credentials.invalid:
+
+    if not credentials or credentials.invalid:
         flow = flow_from_clientsecrets(CLIENT_SECRET, scope=SCOPE)
         http = httplib2.Http()
         credentials = run_flow(flow, STORAGE, http=http)
     
+    if credentials.access_token_expired:
+        print("🔄 Refreshing expired token...")
+        credentials.refresh(httplib2.Http())
+
     return credentials
+
 
 def getBloggerService():
     credentials = authorize_credentials()
@@ -40,39 +48,43 @@ def postFromJson():
         posts_data = json.load(file)
 
     for entry in posts_data:
-        if not all(entry.get(field) for field in ["title", "summary", "location"]):
-            print("⚠️ Skipping entry due to missing fields.")
+        # Check for missing or empty fields
+        if not all(entry.get(field) and entry[field].strip() for field in ["title", "summary", "location"]):
+            print(f"⚠️ Skipping entry due to missing fields: {entry}")
             continue
 
         title = entry["title"].strip()
         content = entry["summary"].strip()
-        location = entry["location"].strip()
 
         payload = {
             "kind": "blogger#post",
             "title": title,
             "content": content,
             "contentFormat": "html",
-            "labels": [location]  # Treat location as a single entity even if it contains commas
+            "labels": [entry["location"]]
         }
+        
         postToBlogger(payload)
+
+        # 🔹 Random delay to prevent bans (30-90 seconds)
+        print(f"⏳ Waiting 20 seconds before next post...")
+        time.sleep(20)
 
 # 🔹 New Function: Post a single dictionary entry
 def postSingleEntry(entry):
-    if not all(entry.get(field) for field in ["title", "summary", "location"]):
-        print("⚠️ Skipping entry due to missing fields.")
-        return
+    if not all(entry.get(field) and entry[field].strip() for field in ["title", "summary", "location"]):
+        print(f"⚠️ Skipping entry due to missing fields: {entry}")
+        return None
 
     title = entry["title"].strip()
     content = entry["summary"].strip()
-    location = entry["location"].strip()
 
     payload = {
         "kind": "blogger#post",
         "title": title,
         "content": content,
         "contentFormat": "html",
-        "labels": [location]  # Treat location as a single entity even if it contains commas
+        "labels": [entry["location"]]
     }
     
     return postToBlogger(payload)
@@ -114,4 +126,4 @@ def dump_posts_to_json():
     except Exception as e:
         print(f"❌ Error fetching posts: {str(e)}")
 
-postFromJson()
+
