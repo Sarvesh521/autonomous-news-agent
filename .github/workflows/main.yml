@@ -20,12 +20,12 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd autonomous-news-agent
-            git config user.name "Sarvesh521"
-            git config user.email "SarveshKumar.A@iiitb.ac.in"
-            git config github.token ${{ secrets.ACCESS_TOKEN }}
+            git config --global user.name "Sarvesh521"
+            git config --global user.email "SarveshKumar.A@iiitb.ac.in"
+            git config --global github.token ${{ secrets.ACCESS_TOKEN }}
             git pull origin main
-            # source myenv/bin/activate
-            # pip3 install psycopg2-binary
-            # pip3 install -r requirements.txt
+            source myenv/bin/activate
+            pip3 install psycopg2-binary
+            pip3 install -r requirements.txt
             nohup streamlit run home.py --server.port 8501 > streamlit.log 2>&1 &
             disown
