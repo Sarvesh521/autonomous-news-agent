@@ -6,6 +6,7 @@ from oauth2client.tools import run_flow
 from googleapiclient import discovery
 
 BLOG_ID = '8463544618219155212'  # Change this to your blog ID
+BLOG_ID = '8463544618219155212'  # Change this to your blog ID
 
 # Start the OAuth flow to retrieve credentials
 def authorize_credentials():
@@ -139,6 +140,11 @@ def dump_posts_to_json():
 
 <<<<<<< Updated upstream
 postFromJson()
+<<<<<<< HEAD
+
+#postFromJson()
+=======
 =======
 #postFromJson()
 >>>>>>> Stashed changes
+>>>>>>> parent of f284324 (Debugging)

@@ -174,4 +174,3 @@ cython_debug/
 .env
 .ollama
 Learn
-client_secrets.json

@@ -4,6 +4,7 @@ from googleapiclient import discovery
 from auth_blogger import getBloggerService
 
 BLOG_ID = '8463544618219155212'
+BLOG_ID = '8463544618219155212'
 
 # Function to load posts from JSON
 def load_posts():
