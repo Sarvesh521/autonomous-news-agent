@@ -21,5 +21,6 @@ jobs:
           script: |
             cd autonomous-news-agent
             git pull origin main
+            source myenv/bin/activate
             pip3 install streamlit
             nohup streamlit run frontend_real.py --server.port 8501 &
