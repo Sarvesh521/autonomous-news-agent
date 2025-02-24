@@ -88,9 +88,9 @@ def main():
 
         for article in result:
             st.session_state.disabled.append(False)
-            if article["topic_name"] not in articles_topic:
-                articles_topic[article["topic_name"]] = []
-            articles_topic[article["topic_name"]].append(article)
+            if article["location"] not in articles_topic:
+                articles_topic[article["location"]] = []
+            articles_topic[article["location"]].append(article)
 
         topics = list(articles_topic.keys())
 
