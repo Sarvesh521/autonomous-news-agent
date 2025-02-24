@@ -10,7 +10,7 @@ load_dotenv()
 DB_NAME = "mydb"
 USER = "postgres"
 PASSWORD = os.getenv("DB_PASSWORD")
-HOST = "localhost"
+HOST = "54.145.35.27"
 PORT = "5432"
 
 DB_LOAD_FILE = "summarized_articles.json"
