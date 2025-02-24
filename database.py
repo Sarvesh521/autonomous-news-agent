@@ -138,6 +138,7 @@ def query_topic(cur, topic):
             # write this to summarized_articles.json file 
             with open("summarized_articles.json", "w") as file:
                 json.dump(result[1], file, indent=4)
+            return result[1]
         else:
             print(f"\nNo document found for main topic: {topic}")
     except Exception as e:
@@ -162,7 +163,8 @@ def main(topic_name):
         subtopics.append({
             "topic_name": record.get("topic_name", ""),
             "title": record.get("title", ""),
-            "summary": record.get("summary", "")
+            "summary": record.get("summary", ""),
+            "location": record.get("location", "")
         })
     
 

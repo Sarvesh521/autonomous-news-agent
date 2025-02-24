@@ -75,7 +75,8 @@ def main():
             st.session_state.articles = []
 
     st.title("Autonomous News Agent")
-    topic = st.text_input("Enter a topic to scrape")
+    topic = st.text_input("What topic do you want to explore today?")
+    topic = topic.title()
 
     st.button("Process", on_click=reset)
 
@@ -88,7 +89,8 @@ def main():
             st.write(f"Topic {topic} already exists in the database.")
             conn, cur = db.connect_to_db(db.DB_NAME)
             st.write("Fetching topic summary from the database...")
-            db.query_topic(cur, topic)
+            st.session_state.articles = db.query_topic(cur, topic)
+            st.write ("Data fetched from the database for", topic)
             cur.close()
             conn.close()
         else:

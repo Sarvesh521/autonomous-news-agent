@@ -100,7 +100,7 @@ def extract_title(summary_text: str):
     else:
         return "No Title Found", summary_text
 
-def get_chat_response(system_prompt: str, user_prompt: str, model: str = "deepseek-r1:1.5b") -> str:
+def get_chat_response(system_prompt: str, user_prompt: str, model: str = "deepseek-r1:8b") -> str:
     """
     Get a chat response from the specified model using both a system and a user prompt.
     
@@ -172,7 +172,7 @@ def main(NO_OF_CHUNKS):
             "location": location,
             "summary": clean_summary
         })
-        # break
+        break
     with open(MODEL_OUTPUT_FILE, "w", encoding="utf-8") as f:
         json.dump(final_results, f, indent=4, ensure_ascii=False)
     print("Summarized articles saved to:", MODEL_OUTPUT_FILE)
