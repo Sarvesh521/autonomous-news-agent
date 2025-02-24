@@ -5,7 +5,7 @@ from oauth2client.file import Storage
 from oauth2client.tools import run_flow
 from googleapiclient import discovery
 
-BLOG_ID = '711424663010730438'  # Change this to your blog ID
+BLOG_ID = '8463544618219155212'  # Change this to your blog ID
 
 # Start the OAuth flow to retrieve credentials
 def authorize_credentials():
@@ -40,28 +40,47 @@ def postFromJson():
         posts_data = json.load(file)
 
     for entry in posts_data:
+<<<<<<< Updated upstream
         if not all(entry.get(field) for field in ["title", "summary", "location"]):
             print("⚠️ Skipping entry due to missing fields.")
+=======
+        # Check for missing or empty fields
+        if not all(entry.get(field) and entry[field].strip() for field in ["title", "summary", "location"]):
+            print(f"⚠️ Skipping entry due to missing fields: {entry}")
+>>>>>>> Stashed changes
             continue
 
         title = entry["title"].strip()
         content = entry["summary"].strip()
+<<<<<<< Updated upstream
         location = entry["location"].strip()
+=======
+>>>>>>> Stashed changes
 
         payload = {
             "kind": "blogger#post",
             "title": title,
             "content": content,
             "contentFormat": "html",
+<<<<<<< Updated upstream
             "labels": [location]  # Treat location as a single entity even if it contains commas
+=======
+            "labels": [entry["location"]]
+>>>>>>> Stashed changes
         }
         postToBlogger(payload)
 
 # 🔹 New Function: Post a single dictionary entry
 def postSingleEntry(entry):
+<<<<<<< Updated upstream
     if not all(entry.get(field) for field in ["title", "summary", "location"]):
         print("⚠️ Skipping entry due to missing fields.")
         return
+=======
+    if not all(entry.get(field) and entry[field].strip() for field in ["title", "summary", "location"]):
+        print(f"⚠️ Skipping entry due to missing fields: {entry}")
+        return None
+>>>>>>> Stashed changes
 
     title = entry["title"].strip()
     content = entry["summary"].strip()
@@ -72,7 +91,11 @@ def postSingleEntry(entry):
         "title": title,
         "content": content,
         "contentFormat": "html",
+<<<<<<< Updated upstream
         "labels": [location]  # Treat location as a single entity even if it contains commas
+=======
+        "labels": [entry["location"]]
+>>>>>>> Stashed changes
     }
     
     return postToBlogger(payload)
@@ -114,4 +137,8 @@ def dump_posts_to_json():
     except Exception as e:
         print(f"❌ Error fetching posts: {str(e)}")
 
+<<<<<<< Updated upstream
 postFromJson()
+=======
+#postFromJson()
+>>>>>>> Stashed changes

@@ -1,7 +1,7 @@
 import streamlit as st
 import time
 import json
-from auth_blogger import getBloggerService
+from auth_blogger import getBloggerService, dump_posts_to_json
 import web_scraping
 import Model as model
 
@@ -9,7 +9,7 @@ import Model as model
 def postToBlogger(payload):
     service = getBloggerService()
     post = service.posts()
-    insert = post.insert(blogId='711424663010730438', body=payload).execute()
+    insert = post.insert(blogId='8463544618219155212', body=payload).execute()
     return insert
 
 # Function to post a single article
