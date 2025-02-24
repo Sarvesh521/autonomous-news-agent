@@ -3,7 +3,7 @@ import web_scraping as scraper
 import database as db
 import time
 
-TOPIC_NAME = "Crime"
+TOPIC_NAME = "Uttar Pradesh Crime"
 
 def run_web_scraping(topic):
     scraper.main(topic,scraper.MAX_ARTICLES_PER_SUBTOPIC,scraper.MAX_NO_OF_SUBTOPICS)

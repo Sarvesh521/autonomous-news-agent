@@ -34,7 +34,7 @@ def get_url_links_from_topic(topic):
     url = f"https://flipboard.com/search/{topic}"
     print("Fetching URL:", url)
     try:
-        response = requests.get(url, headers=headers, timeout=10)
+        response = requests.get(url, headers=headers, timeout=1000)
         response.raise_for_status()
     except Exception as e:
         print("Error fetching URL:", e)
@@ -48,21 +48,26 @@ def get_url_links_from_topic(topic):
             links.append(href)
     base_url = "https://flipboard.com/"
     topic_names = []
-    url_links = []
+    url_link = ""
+    print("Links:", links)
+    keyword=""
     for link in links:
-        if '/topic' in link:
-            url_links.append(urljoin(base_url, link))
+        if '/@' in link:
+            # url_links.append(urljoin(base_url, link))
+            url_link = urljoin(base_url, link)
+            keyword=link
             # Create a topic name by slicing off the first few characters; adjust as needed.
-            topic_names.append(link[7:])
-    link_topic_name = dict(zip(url_links, topic_names))
-    print("Mapping:", link_topic_name)
-    return (url_links, link_topic_name)
+            break
+    
+    return (keyword,url_link)
+    
 
-def get_article_urls_from_topic_url(topic_url):
+
+def get_article_urls_from_topic_url(topic_url,keyword):
     headers = get_random_headers()
     print("Fetching topic URL:", topic_url)
     try:
-        response = requests.get(topic_url, headers=headers, timeout=10)
+        response = requests.get(topic_url, headers=headers, timeout=1000)
         response.raise_for_status()
     except Exception as e:
         print("Error fetching topic URL:", e)
@@ -71,23 +76,31 @@ def get_article_urls_from_topic_url(topic_url):
     soup = BeautifulSoup(response.text, "html.parser")
     links = []
     list_a_tags = soup.find_all("a", href=True)
+    # print("List of a tags:", list_a_tags)
+    # return list_a_tags
     for a in list_a_tags:
         href = a["href"]
         if href not in links:
-            if '/topic/' in href and topic_url.split('/')[-1].lower() in href.lower() and len(href) > 30:
-                links.append(href)
-    base_url = "https://flipboard.com/"
+            links.append(href)
+    base_url = "https://flipboard.com"
+    # base_url = base_url + keyword
+    print("Base URL:", base_url)
     article_urls = []
     for link in links:
         full_link = urljoin(base_url, link)
         article_urls.append(full_link)
-    return article_urls
+    check_url = base_url + keyword
+    need_urls = []
+    for article_url in article_urls:
+        if check_url in article_url:
+            need_urls.append(article_url)
+    return need_urls
 
 def get_source_url(url):
     headers = get_random_headers()
     print("Fetching source from URL:", url)
     try:
-        response = requests.get(url, headers=headers, timeout=10)
+        response = requests.get(url, headers=headers, timeout=1000)
         response.raise_for_status()
     except Exception as e:
         print("Error fetching URL:", e)
@@ -107,7 +120,7 @@ def extract_article_text(url):
     headers = get_random_headers()
     print("Extracting article text from:", url)
     try:
-        response = requests.get(url, headers=headers, timeout=10)
+        response = requests.get(url, headers=headers, timeout=1000)
         response.raise_for_status()
     except Exception as e:
         print("Error fetching article text from URL:", e)
@@ -124,45 +137,27 @@ def extract_article_text(url):
     clean_text = "\n".join(line for line in lines if line)
     return clean_text
 
-def main(topic, max_articles, max_subtopics):
-    result = []
-    topic_url_links, topic_name_dict = get_url_links_from_topic(topic)
-    if not topic_url_links:
-        print(f"No topic URL links found for topic: {topic}")
-        return
-
-    print("Topic URL Links:", topic_url_links)
-    print("Topic Name Dictionary:", topic_name_dict)
-    
-    subtopic_count = 0
-    for topic_url in topic_url_links:
-        if subtopic_count >= max_subtopics:
-            print(f"Reached maximum subtopics limit: {max_subtopics}")
-            break
-        topic_articles = []
-        article_topic_name = topic_name_dict.get(topic_url, topic)
-        print("Processing topic URL:", topic_url)
-        print("Article topic name:", article_topic_name)
-        article_urls = get_article_urls_from_topic_url(topic_url)
-        print("Article URLs:", article_urls)
-        article_count = 0
-        for article_url in article_urls:
-            if article_count >= max_articles:
-                print(f"Reached maximum articles per subtopic limit: {max_articles}")
-                break
-            source_url = get_source_url(article_url)
-            if not source_url:
-                print("Source URL not found for article:", article_url)
-                continue
-            article_text = extract_article_text(source_url)
-            topic_articles.append((source_url, article_text))
-            article_count += 1
-        if topic_articles:
+def main(topic,MAX_ARTICLES_PER_SUBTOPIC,MAX_NO_OF_SUBTOPICS):
+    result=[]
+    (keyword,topic_url) = get_url_links_from_topic(topic)
+    print("Keyword:", keyword)
+    print("Topic URL:", topic_url)
+    article_urls = get_article_urls_from_topic_url(topic_url,keyword)
+    print("Article URLs:", article_urls)
+    print("Number of articles:", len(article_urls))
+    print("Article URLs:", article_urls)
+    for article_url in article_urls:
+        source_url = get_source_url(article_url)
+        if not source_url:
+            print("Source URL not found for article:", article_url)
+            continue
+        article_text = extract_article_text(source_url)
+        if article_text!="":
             result.append({
-                "topic_name": article_topic_name,
-                "url_content": topic_articles
+                "url": source_url,
+                "url_content": article_text
             })
-            subtopic_count += 1
+    print("Result:", result)
 
     try:
         with open(SCRAPER_OUTPUT_FILE, "w", encoding="utf-8") as f:
@@ -171,9 +166,8 @@ def main(topic, max_articles, max_subtopics):
     except Exception as e:
         print("Error writing JSON file:", e)
 
-
 if __name__ == "__main__":
-    topic = "Manchester United"
+    topic = "Football"
     start_time = time.time()
     main(topic, MAX_ARTICLES_PER_SUBTOPIC, MAX_NO_OF_SUBTOPICS)
     end_time = time.time()
