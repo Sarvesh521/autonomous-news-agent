@@ -55,8 +55,15 @@ def main():
 
     if "flag" not in st.session_state:
         st.session_state.flag = 0
+    
+    if "articles" not in st.session_state:
+        try:
+            with open("summarized_articles.json", "r") as f:
+                st.session_state.articles = json.load(f)
+        except:
+            st.session_state.articles = []
 
-    st.title("Streamlit App")
+    st.title("Autonomous News Agent")
     topic = st.text_input("Enter a topic to scrape")
 
     st.button("Process", on_click=reset)
@@ -73,38 +80,38 @@ def main():
         st.write("Articles processed for", topic)
         st.divider()
 
-    if st.session_state.flag == 2:
-        result = st.session_state.articles
-        st.header("Articles")
-        st.divider()
-        articles_topic = {}
 
-        for article in result:
-            st.session_state.disabled.append(False)
-            if article["location"] not in articles_topic:
-                articles_topic[article["location"]] = []
-            articles_topic[article["location"]].append(article)
+    result = st.session_state.articles
+    st.header("Articles")
+    st.divider()
+    articles_topic = {}
 
-        topics = list(articles_topic.keys())
-        print("Topics", topics)
-        tabs = st.tabs(topics + ["Posted Articles"])
+    for article in result:
+        st.session_state.disabled.append(False)
+        if article["location"] not in articles_topic:
+            articles_topic[article["location"]] = []
+        articles_topic[article["location"]].append(article)
 
-        i = 1
-        for topic, articles in articles_topic.items():
-            with tabs[topics.index(topic)]:
-                st.subheader(topic)
-                for article in articles:
-                    st.markdown(f"## {article['title']}")
-                    st.write(article['summary'])
-                    st.button(f"Post article {i}", on_click=post_article, args=(article, i), disabled=st.session_state.disabled[i - 1])
-                    i += 1
-                    st.divider()
+    topics = list(articles_topic.keys())
+    print("Topics", topics)
+    tabs = st.tabs(topics + ["Posted Articles"])
 
-        with tabs[-1]:
-            st.subheader("Posted Articles (From the Current Topic)")
-            for article in st.session_state.posted_articles:
-                st.write(article['title'])
+    i = 1
+    for topic, articles in articles_topic.items():
+        with tabs[topics.index(topic)]:
+            st.subheader(topic)
+            for article in articles:
+                st.markdown(f"## {article['title']}")
+                st.write(article['summary'])
+                st.button(f"Post article {i}", on_click=post_article, args=(article, i), disabled=st.session_state.disabled[i - 1])
+                i += 1
                 st.divider()
+
+    with tabs[-1]:
+        st.subheader("Posted Articles (From the Current Topic)")
+        for article in st.session_state.posted_articles:
+            st.write(article['title'])
+            st.divider()
 
 if __name__ == '__main__':
     main()
