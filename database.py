@@ -135,6 +135,9 @@ def query_topic(cur, topic):
         if result:
             print("\nFound document for main topic:", topic)
             print(json.dumps(result[1], indent=4))
+            # write this to summarized_articles.json file 
+            with open("summarized_articles.json", "w") as file:
+                json.dump(result[1], file, indent=4)
         else:
             print(f"\nNo document found for main topic: {topic}")
     except Exception as e:
