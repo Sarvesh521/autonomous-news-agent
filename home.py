@@ -110,9 +110,11 @@ def main():
 
     for article in result:
         st.session_state.disabled.append(False)
-        if article["location"] not in articles_topic:
+        if article["location"] not in articles_topic and article["location"] is not None:
             articles_topic[article["location"]] = []
-        articles_topic[article["location"]].append(article)
+        
+        if article["location"] is not None:
+            articles_topic[article["location"]].append(article)
 
     topics = list(articles_topic.keys())
     print("Topics", topics)
@@ -120,6 +122,8 @@ def main():
 
     i = 1
     for topic, articles in articles_topic.items():
+        if(topic is None):
+            continue
         with tabs[topics.index(topic)]:
             st.subheader(topic)
             for article in articles:
