@@ -33,6 +33,9 @@ def get_scraped_data(topic):
 
 # Get articles from JSON
 def get_articles(scraped_json):
+    # with open("summarized_articles.json", "r") as f:
+    #     articles = json.load(f)
+    # return articles
     return model.main(model.NO_OF_CHUNKS)
 
 # Function to post an article
@@ -52,9 +55,16 @@ def reset():
 
 # Main Streamlit app
 def main():
-
     if "flag" not in st.session_state:
         st.session_state.flag = 0
+    
+    if "disabled" not in st.session_state:
+        st.session_state.disabled = []
+
+    if "posted_articles" not in st.session_state:
+        st.session_state.posted_articles = []
+    
+    print("HELLO")
     
     if "articles" not in st.session_state:
         try:
@@ -80,7 +90,7 @@ def main():
         st.write("Articles processed for", topic)
         st.divider()
 
-
+    print("HELLO")
     result = st.session_state.articles
     st.header("Articles")
     st.divider()
