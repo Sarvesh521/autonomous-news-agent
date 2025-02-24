@@ -1,9 +1,9 @@
 import streamlit as st
 import time
 import json
-from auth_blogger import getBloggerService, dump_posts_to_json
-
-dump_posts_to_json()
+from auth_blogger import getBloggerService
+import web_scraping
+import Model as model
 
 # Blogger posting function
 def postToBlogger(payload):
@@ -29,15 +29,11 @@ def postSingleEntry(entry):
 
 # Simulated scraping function
 def get_scraped_data(topic):
-    time.sleep(2)
-    return f"Scraped data for {topic}"
+    return web_scraping.main(topic, web_scraping.MAX_ARTICLES_PER_SUBTOPIC, web_scraping.MAX_NO_OF_SUBTOPICS)
 
 # Get articles from JSON
 def get_articles(scraped_json):
-    time.sleep(2)
-    with open("summarized_articles.json", "r") as f:
-        articles = json.load(f)
-    return articles
+    return model.main(model.NO_OF_CHUNKS)
 
 # Function to post an article
 def post_article(article, i):
@@ -92,9 +88,9 @@ def main():
 
         for article in result:
             st.session_state.disabled.append(False)
-            if article["topic_name"] not in articles_topic:
-                articles_topic[article["topic_name"]] = []
-            articles_topic[article["topic_name"]].append(article)
+            if article["location"] not in articles_topic:
+                articles_topic[article["location"]] = []
+            articles_topic[article["location"]].append(article)
 
         topics = list(articles_topic.keys())
 
