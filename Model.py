@@ -15,6 +15,34 @@ NO_OF_CHUNKS = 3     # Number of chunks to select for summarization.
 SCRAPER_OUTPUT_FILE = "processed_articles.json"
 MODEL_OUTPUT_FILE = "summarized_articles.json"
 
+
+def extract_info(text: str) -> tuple:
+    """
+    Extract the title, location, and summary from the provided text.
+    
+    The function expects the text to begin with:
+    
+    **Title:** <actual title>
+    
+    **Location:** <actual location>
+    
+    followed by one or more newlines and then the summary text.
+    
+    Returns:
+        tuple: (title, location, summary)
+    """
+    pattern = r"^\*\*Title:\*\*\s*(?P<title>.*?)\s*\n\s*\*\*Location:\*\*\s*(?P<location>.*?)\s*\n+(?P<summary>.*)$"
+    match = re.search(pattern, text, re.DOTALL | re.MULTILINE)
+    if match:
+        title = match.group("title").strip()
+        location = match.group("location").strip()
+        summary = match.group("summary").strip()
+        return (title, location, summary)
+    else:
+        # If the expected pattern is not found, return None for title and location,
+        # and the whole text as the summary.
+        return (None, None, text)
+
 def load_processed_articles(file_path=SCRAPER_OUTPUT_FILE):
     """Load processed articles from the given JSON file."""
     with open(file_path, "r", encoding="utf-8") as f:
@@ -106,59 +134,46 @@ def get_chat_response(system_prompt: str, user_prompt: str, model: str = "deepse
 def main(NO_OF_CHUNKS):
     articles = load_processed_articles(SCRAPER_OUTPUT_FILE)
     final_results = []
-
-    # System prompt remains unchanged.
     system_prompt = (
         "You are a highly factual and SEO-optimized summarizer. "
         "Your task is to produce concise, authoritative, and fully factual summaries. "
         "Avoid hallucinations and ensure the output includes relevant SEO keywords."
     )
+    print("articles")
+    print(articles)
 
-    # Updated user prompt to emphasize the title format.
-    user_prompt = (
-        "Please produce a blog post summary for the following text. "
-        "Your output MUST start with the blog post title exactly in the following format: \n\n"
-        "**Title:** <actual title of the blog post>\n\n"
-        "Then provide a concise, factual summary below. "
-        "Ensure that the summary is SEO optimized with keywords. \n\n"
-        "Text: {text}"
-    )
-
-    for topic_dict in articles:
-        topic_name = topic_dict.get("topic_name", "Unknown Topic")
-        print(f"\nProcessing topic: {topic_name}")
-        aggregated_text = aggregate_topic_text(topic_dict)
-        if not aggregated_text.strip():
-            print(f"No text found for topic: {topic_name}")
-            continue
-
-        chunks = create_text_chunks(aggregated_text, chunk_size=1000, chunk_overlap=200)
-        embeddings = create_embeddings_for_chunks(chunks)
-
-        # Use embeddings: compute centroid and select top N chunks.
-        embeddings_arr = np.array(embeddings)
-        centroid = embeddings_arr.mean(axis=0)
-        similarities = [cosine_similarity(e, centroid) for e in embeddings_arr]
-        N = min(NO_OF_CHUNKS, len(chunks))
-        top_indices = sorted(range(len(similarities)), key=lambda i: similarities[i], reverse=True)[:N]
-        selected_chunks = [chunks[i] for i in top_indices]
-        input_text = "\n".join(selected_chunks)
-
-        # Format the user prompt by replacing {text} with our input text.
-        formatted_user_prompt = user_prompt.format(text=input_text)
-
-        summary = get_chat_response(system_prompt, formatted_user_prompt, model="deepseek-r1:8b")
-
-        title, clean_summary = extract_title(summary)
-
+    for x in articles:
+        print("x", x)
+        print("x['url_content']", x['url_content'])
+        user_prompt = (
+            "Please produce a blog post summary for the following text. "
+            "Your output MUST start with the blog post title exactly in the following format: \n\n"
+            "**Title:** <actual title of the blog post>\n\n"
+            "Provide a Geaopgraphic Location from where the article is based. Pinpoint the location, give me as low level information of the location as possible. \n\n"
+            "Location: <Location> \n\n"
+            "Then provide a concise, factual summary below. "
+            "Ensure that the summary is SEO optimized with keywords. \n\n"
+            "Text: {text}"
+        )
+        user_prompt = user_prompt.format(text=x['url_content'])
+        # print("user_prompt", user_prompt)
+        full_response = get_chat_response(system_prompt, user_prompt)
+        print("full_response")
+        print(full_response)
+        print("....................")
+        # title, clean_summary = extract_title(full_response)
+        title, location, clean_summary = extract_info(full_response)
+        # print("title", title)
+        # print("clean_summary", clean_summary)
         final_results.append({
-            "topic_name": topic_name,
+            "topic_name": title,
             "title": title,
+            "location": location,
             "summary": clean_summary
         })
-
     with open(MODEL_OUTPUT_FILE, "w", encoding="utf-8") as f:
         json.dump(final_results, f, indent=4, ensure_ascii=False)
+    print("Summarized articles saved to:", MODEL_OUTPUT_FILE)
 
 if __name__ == "__main__":
     start_time = time.time()
