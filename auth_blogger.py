@@ -6,7 +6,6 @@ from oauth2client.tools import run_flow
 from googleapiclient import discovery
 
 BLOG_ID = '8463544618219155212'  # Change this to your blog ID
-BLOG_ID = '8463544618219155212'  # Change this to your blog ID
 
 # Start the OAuth flow to retrieve credentials
 def authorize_credentials():
@@ -66,7 +65,6 @@ def postSingleEntry(entry):
 
     title = entry["title"].strip()
     content = entry["summary"].strip()
-    location = entry["location"].strip()
 
     payload = {
         "kind": "blogger#post",
@@ -115,6 +113,4 @@ def dump_posts_to_json():
     except Exception as e:
         print(f"❌ Error fetching posts: {str(e)}")
 
-
-#postFromJson()
-
+# postFromJson()
