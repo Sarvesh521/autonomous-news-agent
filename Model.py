@@ -100,7 +100,7 @@ def extract_title(summary_text: str):
     else:
         return "No Title Found", summary_text
 
-def get_chat_response(system_prompt: str, user_prompt: str, model: str = "deepseek-r1:8b") -> str:
+def get_chat_response(system_prompt: str, user_prompt: str, model: str = "deepseek-r1:1.5b") -> str:
     """
     Get a chat response from the specified model using both a system and a user prompt.
     
