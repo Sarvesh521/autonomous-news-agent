@@ -9,7 +9,7 @@ BLOG_ID = '711424663010730438'  # Change this to your blog ID
 
 # Start the OAuth flow to retrieve credentials
 def authorize_credentials():
-    CLIENT_SECRET = 'client_secret.json'
+    CLIENT_SECRET = 'client_secrets.json'
     SCOPE = 'https://www.googleapis.com/auth/blogger'
     STORAGE = Storage('credentials.storage')
     
