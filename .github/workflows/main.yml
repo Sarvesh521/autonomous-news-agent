@@ -26,5 +26,6 @@ jobs:
             git pull origin main
             source myenv/bin/activate
             pip3 install streamlit
+            pip install -r requirements.txt
             nohup streamlit run frontend_real.py --server.port 8501 > streamlit.log 2>&1 &
             disown
