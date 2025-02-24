@@ -4,8 +4,9 @@ import json
 from auth_blogger import getBloggerService, dump_posts_to_json
 import web_scraping
 import Model as model
-import database as db
 from auth_blogger import authorize_credentials
+# import database as db
+
 
 # Blogger posting function
 def postToBlogger(payload):
@@ -36,7 +37,7 @@ def get_scraped_data(topic):
 # Get articles from JSON
 def get_articles(scraped_json,topic):
     x = model.main(model.NO_OF_CHUNKS)
-    db.main(topic)
+    # db.main(topic)
     return x
 
 # Function to post an article
@@ -86,21 +87,20 @@ def main():
         st.session_state.disabled = []
         st.session_state.flag = 2
 
-        if db.check_topic_exists(topic):
-            st.write(f"Topic {topic} already exists in the database.")
-            conn, cur = db.connect_to_db(db.DB_NAME)
-            st.write("Fetching topic summary from the database...")
-            db.query_topic(cur, topic)
-            cur.close()
-            conn.close()
-        else:
-            st.write("Scraping data...")
-            result = get_scraped_data(topic)
-            st.write("Data scraped for", topic)
-            st.write("Processing articles...")
-            st.session_state.articles = get_articles(result,topic)
-            st.write("Articles processed for", topic)
-            st.divider()
+        # if db.check_topic_exists(topic):
+        #     st.write(f"Topic {topic} already exists in the database.")
+        #     conn, cur = db.connect_to_db(db.DB_NAME)
+        #     st.write("Fetching topic summary from the database...")
+        #     db.query_topic(cur, topic)
+        #     cur.close()
+        #     conn.close()
+        st.write("Scraping data...")
+        result = get_scraped_data(topic)
+        st.write("Data scraped for", topic)
+        st.write("Processing articles...")
+        st.session_state.articles = get_articles(result,topic)
+        st.write("Articles processed for", topic)
+        st.divider()
 
     print("HELLO")
     result = st.session_state.articles
