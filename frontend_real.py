@@ -47,12 +47,6 @@ def post_article(article, i):
 def reset():
     st.session_state.flag = 1
 
-# Cancel button functionality
-def cancel():
-    st.session_state.flag = 0
-    st.session_state.articles = []
-    st.session_state.posted_articles = []
-    st.session_state.disabled = []
 
 
 
@@ -66,7 +60,6 @@ def main():
     topic = st.text_input("Enter a topic to scrape")
 
     st.button("Process", on_click=reset)
-    st.button("Cancel", on_click=cancel)
 
     if st.session_state.flag == 1:
         st.session_state.posted_articles = []
