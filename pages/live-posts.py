@@ -30,7 +30,7 @@ def delete_post(post_id):
         save_posts(updated_posts)
         
         st.success(f"✅ Post {post_id} deleted successfully!")
-        st.rerun()  # Use st.rerun() instead of experimental_rerun()
+        st.rerun()
 
     except Exception as e:
         st.error(f"❌ Error deleting post: {str(e)}")
@@ -43,9 +43,11 @@ posts = load_posts()
 if posts:
     for post in posts:
         with st.expander(f"{post['title']}"):
+            st.write(f"📌 **Location:** {post.get('location', 'N/A')}")
+            st.write(f"📖 **Summary:** {post.get('summary', 'N/A')}")
             st.write(f"🔗 [View Post]({post['url']})")
-            st.write(f"📅 Published: {post['published']}")
+            st.write(f"📅 **Published:** {post['published']}")
             if st.button(f"❌ Delete Post {post['id']}", key=post['id']):
                 delete_post(post['id'])
 else:
-    st.warning("No posts found. Run `dump_posts_to_json()` first.")
+    st.warning("⚠️ No posts found. Run `dump_posts_to_json()` first.")

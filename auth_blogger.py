@@ -40,29 +40,39 @@ def postFromJson():
         posts_data = json.load(file)
 
     for entry in posts_data:
-        title = entry["title"].strip()  
-        content = entry["summary"].strip()  
+        if not all(entry.get(field) for field in ["title", "summary", "location"]):
+            print("⚠️ Skipping entry due to missing fields.")
+            continue
+
+        title = entry["title"].strip()
+        content = entry["summary"].strip()
+        location = entry["location"].strip()
 
         payload = {
             "kind": "blogger#post",
             "title": title,
             "content": content,
             "contentFormat": "html",
-            "labels": [entry["topic_name"]]
+            "labels": [location]  # Treat location as a single entity even if it contains commas
         }
         postToBlogger(payload)
 
 # 🔹 New Function: Post a single dictionary entry
 def postSingleEntry(entry):
+    if not all(entry.get(field) for field in ["title", "summary", "location"]):
+        print("⚠️ Skipping entry due to missing fields.")
+        return
+
     title = entry["title"].strip()
     content = entry["summary"].strip()
+    location = entry["location"].strip()
 
     payload = {
         "kind": "blogger#post",
         "title": title,
         "content": content,
         "contentFormat": "html",
-        "labels": [entry["topic_name"]]
+        "labels": [location]  # Treat location as a single entity even if it contains commas
     }
     
     return postToBlogger(payload)
@@ -104,4 +114,4 @@ def dump_posts_to_json():
     except Exception as e:
         print(f"❌ Error fetching posts: {str(e)}")
 
-dump_posts_to_json()
+postFromJson()

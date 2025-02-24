@@ -1,7 +1,9 @@
 import streamlit as st
 import time
 import json
-from auth_blogger import getBloggerService
+from auth_blogger import getBloggerService, dump_posts_to_json
+
+dump_posts_to_json()
 
 # Blogger posting function
 def postToBlogger(payload):
