@@ -164,6 +164,7 @@ def main(topic,MAX_ARTICLES_PER_SUBTOPIC,MAX_NO_OF_SUBTOPICS):
             json.dump(result, f, indent=4, ensure_ascii=False)
         print("Web scraping completed successfully. Data written to", SCRAPER_OUTPUT_FILE)
         return result
+    #test
     except Exception as e:
         print("Error writing JSON file:", e)
 
